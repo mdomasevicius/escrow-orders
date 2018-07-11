@@ -11,7 +11,11 @@ repositories {
     mavenCentral()
 }
 
+def lombokDependency = 'org.projectlombok:lombok:1.18.0'
+
 dependencies {
+    annotationProcessor(lombokDependency)
+    compileOnly(lombokDependency)
     compile (
         'org.springframework.boot:spring-boot-starter-web:2.0.3.RELEASE'
     )
