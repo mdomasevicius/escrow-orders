@@ -23,6 +23,7 @@ class Order {
     private String item;
     private BigDecimal price;
     private String buyer;
+    private String seller;
     private State state;
     private LocalDateTime created;
 
@@ -34,9 +35,10 @@ class Order {
         }
     }
 
-    void orderCompleted() {
+    void orderCompleted(String seller) {
         if (state == PAID) {
             this.state = COMPLETED;
+            this.seller = seller;
         } else {
             throw new BadRequestException();
         }

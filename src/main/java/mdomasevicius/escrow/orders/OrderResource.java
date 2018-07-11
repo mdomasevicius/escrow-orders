@@ -50,11 +50,11 @@ class OrderResource {
 
     @PostMapping
     ResponseEntity requestItem(
-            @RequestHeader("User") String user,
+            @RequestHeader("User") String buyer,
             @RequestBody OrderRequest request
     ) {
         Long id = orders.create(Order.builder()
-                .buyer(user)
+                .buyer(buyer)
                 .item(request.getItem())
                 .price(request.getPrice())
                 .created(now())
@@ -72,8 +72,11 @@ class OrderResource {
     }
 
     @PutMapping("/{orderId}/deliver")
-    ResponseEntity deliverItem(@PathVariable Long orderId) {
-        orders.completeOrder(orderId);
+    ResponseEntity deliverItem(
+            @RequestHeader("User") String seller,
+            @PathVariable Long orderId
+    ) {
+        orders.completeOrder(orderId, seller);
         return noContent().build();
     }
 
@@ -95,6 +98,8 @@ class OrderResource {
         private BigDecimal price;
         private Order.State state;
         private LocalDateTime created;
+        private String buyer;
+        private String seller;
 
         @JsonProperty("_links")
         @JsonInclude(NON_EMPTY)
@@ -111,6 +116,8 @@ class OrderResource {
                     .price(order.getPrice())
                     .state(order.getState())
                     .created(order.getCreated())
+                    .buyer(order.getBuyer())
+                    .seller(order.getSeller())
                     .build();
 
             if (order.getState() == PENDING) {
@@ -124,7 +131,7 @@ class OrderResource {
                 response.addLink
                         (new Link(
                                 "deliverItem",
-                                linkTo(methodOn(OrderResource.class).deliverItem(order.getId())).toUri()));
+                                linkTo(methodOn(OrderResource.class).deliverItem(null, order.getId())).toUri()));
             }
 
             return response;

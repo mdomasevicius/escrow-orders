@@ -33,10 +33,10 @@ class Orders {
     }
 
     @Transactional
-    public void completeOrder(Long id) {
+    public void completeOrder(Long id, String seller) {
         repo.findById(id)
                 .orElseThrow(NotFoundException::new)
-                .orderCompleted();
+                .orderCompleted(seller);
     }
 
     @Transactional(readOnly = true)
