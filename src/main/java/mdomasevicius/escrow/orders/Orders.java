@@ -3,6 +3,8 @@ package mdomasevicius.escrow.orders;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Set;
+
 @Service
 class Orders {
 
@@ -35,5 +37,10 @@ class Orders {
         repo.findById(id)
                 .orElseThrow(NotFoundException::new)
                 .orderCompleted();
+    }
+
+    @Transactional(readOnly = true)
+    public Set<Order> findAll(String user) {
+        return repo.findByBuyer(user);
     }
 }

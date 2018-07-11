@@ -12,11 +12,11 @@ import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.net.URI;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static java.time.LocalDateTime.now;
+import static java.util.stream.Collectors.*;
 import static mdomasevicius.escrow.orders.Order.State.PAID;
 import static mdomasevicius.escrow.orders.Order.State.PENDING;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
@@ -41,8 +41,11 @@ class OrderResource {
 
 
     @GetMapping
-    void search() {
-
+    Set<OrderResponse> list(@RequestHeader("User") String user) {
+        return orders.findAll(user)
+                .stream()
+                .map(OrderResponse::toDto)
+                .collect(toSet());
     }
 
     @PostMapping
