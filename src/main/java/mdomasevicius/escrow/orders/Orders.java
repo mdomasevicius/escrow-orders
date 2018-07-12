@@ -1,5 +1,6 @@
 package mdomasevicius.escrow.orders;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +12,7 @@ import static java.time.LocalDateTime.now;
 import static mdomasevicius.escrow.orders.Order.State.PENDING;
 
 @Service
+@Slf4j
 class Orders {
 
     private final OrderRepo repo;
@@ -56,6 +58,10 @@ class Orders {
                 .stream()
                 .filter(o -> o.getCreated().isBefore(now().minusHours(2)) && o.getState() == PENDING)
                 .collect(Collectors.toSet());
+
+        if (toDelete.size() > 0) {
+            log.info("Found {} stale orders - removing.", toDelete.size());
+        }
 
         repo.deleteAll(toDelete);
     }
