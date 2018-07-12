@@ -27,7 +27,6 @@ dependencies {
         'com.h2database:h2:1.4.197',
 
         "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion",
-        "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:$jacksonVersion"
     )
 }
 

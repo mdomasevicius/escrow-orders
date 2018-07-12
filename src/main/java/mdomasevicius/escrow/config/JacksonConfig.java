@@ -1,6 +1,5 @@
 package mdomasevicius.escrow.config;
 
-import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -16,7 +15,6 @@ class JacksonConfig {
     Jackson2ObjectMapperBuilder objectMapperBuilder() {
         return Jackson2ObjectMapperBuilder
                 .json()
-                .modules(new Jdk8Module())
                 .modules(new JavaTimeModule())
                 .featuresToDisable(WRITE_DATES_AS_TIMESTAMPS)
                 .featuresToEnable(WRITE_BIGDECIMAL_AS_PLAIN);
