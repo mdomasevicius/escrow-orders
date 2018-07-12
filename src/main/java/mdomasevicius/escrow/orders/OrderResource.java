@@ -49,7 +49,7 @@ class OrderResource {
     }
 
     @PostMapping
-    ResponseEntity requestItem(
+    ResponseEntity createOrder(
             @RequestHeader("User") String buyer,
             @RequestBody OrderRequest request
     ) {
