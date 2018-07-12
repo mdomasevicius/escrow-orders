@@ -50,7 +50,7 @@ class Orders {
     }
 
     @Transactional
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelayString = "${escrow.schedule.orderRemovalInMills:60000}")
     public void removeUnpaidOrders() {
         Set<Order> toDelete = repo.findAll()
                 .stream()
