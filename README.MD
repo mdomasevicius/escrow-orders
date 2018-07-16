@@ -38,7 +38,7 @@ Entry point is - `mdomasevicius.escrow.App`
 
 ### Create Order
 
-`$ curl -d '{"item": "Speed Boots", "price": 199.65}' -H "Content-Type: application/json" -H "User: John" -X POST http://localhost:8080/api/orders`
+`$ curl -d '{"item": "Speed Boots", "price": 199.65, "seller": "Wick"}' -H "Content-Type: application/json" -H "User: John" -X POST http://localhost:8080/api/orders`
 
 ### List Orders
 
