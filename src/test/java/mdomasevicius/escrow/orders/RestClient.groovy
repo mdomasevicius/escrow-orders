@@ -16,7 +16,7 @@ import static org.springframework.util.CollectionUtils.toMultiValueMap
 @Component
 class RestClient {
 
-    private final TestRestTemplate rest;
+    private final TestRestTemplate rest
 
     RestClient(TestRestTemplate rest) {
         this.rest = rest

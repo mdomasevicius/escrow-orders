@@ -1,13 +1,18 @@
 package mdomasevicius.escrow.orders
 
 import mdomasevicius.escrow.App
+import mdomasevicius.escrow.orders.Order.State
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ContextConfiguration
 import spock.lang.Specification
 import spock.lang.Unroll
 
+import java.time.LocalDateTime
+
+import static java.time.LocalDateTime.*
 import static mdomasevicius.escrow.orders.NotifierConfig.TestPaymentNotifier
+import static mdomasevicius.escrow.orders.Order.State.*
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import static org.springframework.http.HttpStatus.*
 
@@ -20,6 +25,12 @@ class OrderResourceSpec extends Specification {
 
     @Autowired
     TestPaymentNotifier paymentNotifier
+
+    @Autowired
+    OrderRepo orderRepo
+
+    @Autowired
+    Orders orders
 
     def 'can create order'() {
         when:
@@ -165,6 +176,48 @@ class OrderResourceSpec extends Specification {
             [item: 'item']      || ['seller', 'price'] | BAD_REQUEST
             [price: 19.99]      || ['seller', 'item']  | BAD_REQUEST
             [seller: 'Seller1'] || ['item', 'price']   | BAD_REQUEST
+    }
+
+    def 'unpaid deals are removed after 2 hours'() {
+        given:
+            persistNewOrder('Buyer1234', 'Expire', PENDING)
+        when:
+            orders.removeUnpaidOrders()
+            def response = rest.get('/api/orders', 'Buyer1234')
+        then:
+            !response.body
+    }
+
+    def 'unpaid deals do not get removed earlier'() {
+        given:
+            persistNewOrder('b2b', 'Expire', PENDING, now().minusHours(1))
+        when:
+            orders.removeUnpaidOrders()
+            def response = rest.get('/api/orders', 'b2b')
+        then:
+            response.body.count { it.name = 'Expire' && it.buyer == 'b2b' } == 1
+    }
+
+    def 'only pending deals can get removed'() {
+        given:
+            persistNewOrder('leeroy', 'Expire 1', PENDING)
+            persistNewOrder('leeroy', 'Expire 2', COMPLETED)
+            persistNewOrder('leeroy', 'Expire 3', PAID)
+        when:
+            orders.removeUnpaidOrders()
+            def response = rest.get('/api/orders', 'leeroy')
+        then:
+            response.body.count { it.item in ['Expire 1', 'Expire 2', 'Expire 3'] } == 2
+    }
+
+    private Order persistNewOrder(String buyer, String item, State state, LocalDateTime createdAt = now().minusHours(2)) {
+        return orderRepo.save(new Order(
+            item: item,
+            price: 1,
+            buyer: buyer,
+            seller: 'Seller1234',
+            created: createdAt,
+            state: state))
     }
 
     private void createOrder(String user = 'anonymous', String seller = 'seller') {
