@@ -33,10 +33,10 @@ class Orders {
     }
 
     @Transactional
-    public void completePayment(Long id) {
+    public void completePayment(Long id, String user) {
         repo.findById(id)
                 .orElseThrow(NotFoundException::new)
-                .paymentCompleted();
+                .paymentCompleted(user);
     }
 
     @Transactional

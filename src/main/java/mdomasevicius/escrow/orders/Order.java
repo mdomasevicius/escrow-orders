@@ -23,13 +23,15 @@ class Order {
     private String item;
     private BigDecimal price;
     private String buyer;
+    private String paidBy;
     private String seller;
     private State state;
     private LocalDateTime created;
 
-    void paymentCompleted() {
+    void paymentCompleted(String paidBy) {
         if (state == PENDING) {
             this.state = PAID;
+            this.paidBy = paidBy;
         } else {
             throw new BadRequestException();
         }

@@ -16,13 +16,14 @@ import java.util.*;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_EMPTY;
 import static java.time.LocalDateTime.now;
-import static java.util.stream.Collectors.*;
+import static java.util.stream.Collectors.toSet;
 import static mdomasevicius.escrow.orders.Order.State.PAID;
 import static mdomasevicius.escrow.orders.Order.State.PENDING;
+import static mdomasevicius.escrow.orders.OrderResource.OrderResponse.toDto;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.methodOn;
-import static org.springframework.http.ResponseEntity.created;
-import static org.springframework.http.ResponseEntity.noContent;
+import static org.springframework.http.HttpStatus.FORBIDDEN;
+import static org.springframework.http.ResponseEntity.*;
 
 @RequestMapping("/api/orders")
 @RestController
@@ -35,8 +36,17 @@ class OrderResource {
     }
 
     @GetMapping("/{id}")
-    OrderResponse findOne(@PathVariable Long id) {
-        return OrderResponse.toDto(orders.findOne(id));
+    ResponseEntity<OrderResponse> findOne(
+            @PathVariable Long id,
+            @RequestHeader("User") String buyer
+    ) {
+        Order order = orders.findOne(id);
+
+        if (!order.getBuyer().equals(buyer)) {
+            return status(FORBIDDEN).build();
+        }
+
+        return ok(toDto(order));
     }
 
 
@@ -61,13 +71,16 @@ class OrderResource {
                 .state(PENDING)
                 .build());
 
-        URI orderLocation = linkTo(methodOn(OrderResource.class).findOne(id)).toUri();
+        URI orderLocation = linkTo(methodOn(OrderResource.class).findOne(id, buyer)).toUri();
         return created(orderLocation).build();
     }
 
     @PutMapping("/{orderId}/payment")
-    ResponseEntity pay(@PathVariable Long orderId) {
-        orders.completePayment(orderId);
+    ResponseEntity pay(
+            @RequestHeader("User") String user,
+            @PathVariable Long orderId
+    ) {
+        orders.completePayment(orderId, user);
         return noContent().build();
     }
 
@@ -100,6 +113,7 @@ class OrderResource {
         private LocalDateTime created;
         private String buyer;
         private String seller;
+        private String paidBy;
 
         @JsonProperty("_links")
         @JsonInclude(NON_EMPTY)
@@ -110,7 +124,7 @@ class OrderResource {
         }
 
         static OrderResponse toDto(Order order) {
-            OrderResponse response = OrderResponse.builder()
+            OrderResponse response = builder()
                     .id(order.getId())
                     .item(order.getItem())
                     .price(order.getPrice())
@@ -118,20 +132,23 @@ class OrderResource {
                     .created(order.getCreated())
                     .buyer(order.getBuyer())
                     .seller(order.getSeller())
+                    .paidBy(order.getPaidBy())
                     .build();
 
             if (order.getState() == PENDING) {
                 response.addLink(
                         new Link(
                                 "completePayment",
-                                linkTo(methodOn(OrderResource.class).pay(order.getId())).toUri()));
+                                linkTo(methodOn(OrderResource.class)
+                                        .pay(null, order.getId())).toUri()));
             }
 
             if (order.getState() == PAID) {
                 response.addLink
                         (new Link(
                                 "deliverItem",
-                                linkTo(methodOn(OrderResource.class).deliverItem(null, order.getId())).toUri()));
+                                linkTo(methodOn(OrderResource.class)
+                                        .deliverItem(null, order.getId())).toUri()));
             }
 
             return response;

@@ -116,6 +116,28 @@ class OrderResourceSpec extends Specification {
             rest.put("/api/orders/$orderId/payment").statusCode == BAD_REQUEST
     }
 
+    def 'can not single fetch other\'s resource'() {
+        given:
+            def orderA = createOrderAndGetId('UserA')
+            createOrder('UserB')
+
+        when:
+            def forbiddenResponse = rest.get("/api/orders/$orderA", "UserB")
+        then:
+            forbiddenResponse.statusCode == FORBIDDEN
+
+        when:
+            def okResponse = rest.get("/api/orders/$orderA", "UserA")
+        then:
+            okResponse.statusCode == OK
+    }
+
+    def 'payment performer must be tracked'() {
+        expect:
+            rest.get("/api/orders/${createPaidOrderAndGetId('h3h3')}", 'h3h3')
+                .body.paidBy == 'h3h3'
+    }
+
     private void createOrder(String user = 'anonymous') {
         rest.post('/api/orders', [item: 'random', price: 10], user)
     }
