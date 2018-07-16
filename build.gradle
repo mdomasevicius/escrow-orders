@@ -14,6 +14,7 @@ repositories {
 
 def springBootVersion = '2.0.3.RELEASE'
 def jacksonVersion = '2.9.6'
+def swaggerVersion = '2.9.2'
 def lombokDependency = 'org.projectlombok:lombok:1.18.0'
 def groovyDependency = "org.codehaus.groovy:groovy-all:2.4.15"
 
@@ -29,6 +30,9 @@ dependencies {
         'com.h2database:h2:1.4.197',
 
         "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:$jacksonVersion",
+
+        "io.springfox:springfox-swagger2:$swaggerVersion",
+        "io.springfox:springfox-swagger-ui:$swaggerVersion"
     )
 
     testCompile(
