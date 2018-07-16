@@ -38,7 +38,7 @@ class Order {
     }
 
     void orderCompleted(String seller) {
-        if (state == PAID) {
+        if (state == PAID && this.seller.equals(seller)) {
             this.state = COMPLETED;
             this.seller = seller;
         } else {

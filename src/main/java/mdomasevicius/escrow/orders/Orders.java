@@ -16,9 +16,11 @@ import static mdomasevicius.escrow.orders.Order.State.PENDING;
 class Orders {
 
     private final OrderRepo repo;
+    private final PaymentNotifier paymentNotifier;
 
-    Orders(OrderRepo repo) {
+    Orders(OrderRepo repo, PaymentNotifier paymentNotifier) {
         this.repo = repo;
+        this.paymentNotifier = paymentNotifier;
     }
 
     @Transactional
@@ -34,9 +36,12 @@ class Orders {
 
     @Transactional
     public void completePayment(Long id, String user) {
-        repo.findById(id)
-                .orElseThrow(NotFoundException::new)
-                .paymentCompleted(user);
+        Order order = repo.findById(id)
+                .orElseThrow(NotFoundException::new);
+
+        order.paymentCompleted(user);
+
+        paymentNotifier.paymentCompleted(order);
     }
 
     @Transactional

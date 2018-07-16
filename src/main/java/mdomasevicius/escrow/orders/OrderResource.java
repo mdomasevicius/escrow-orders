@@ -7,6 +7,7 @@ import lombok.Data;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
@@ -61,13 +62,14 @@ class OrderResource {
     @PostMapping
     ResponseEntity createOrder(
             @RequestHeader("User") String buyer,
-            @RequestBody OrderRequest request
+            @Valid @RequestBody OrderRequest request
     ) {
         Long id = orders.create(Order.builder()
                 .buyer(buyer)
                 .item(request.getItem())
                 .price(request.getPrice())
                 .created(now())
+                .seller(request.seller)
                 .state(PENDING)
                 .build());
 
@@ -101,6 +103,9 @@ class OrderResource {
 
         @NotNull
         private BigDecimal price;
+
+        @NotBlank
+        private String seller;
     }
 
     @Data
