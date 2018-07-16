@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ContextConfiguration
 import spock.lang.Specification
+import spock.lang.Unroll
 
 import static mdomasevicius.escrow.orders.NotifierConfig.TestPaymentNotifier
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
@@ -25,8 +26,8 @@ class OrderResourceSpec extends Specification {
             def response = rest.post(
                 '/api/orders',
                 [
-                    item: 'Magic Sword of Chuck Norris',
-                    price: 199.99,
+                    item  : 'Magic Sword of Chuck Norris',
+                    price : 199.99,
                     seller: 'Seller1'],
                 'User1')
         then:
@@ -150,6 +151,20 @@ class OrderResourceSpec extends Specification {
         then:
             paymentNotifier.paidOrders
                 .find { it.id == orderId && it.buyer == 'User1337' && it.seller == 'Seller1337' }
+    }
+
+    @Unroll
+    def 'when payload is #payload then validation must fail for fields #missingFields'() {
+        given:
+            def response = rest.post('/api/orders', payload)
+        expect:
+            response.statusCode == expectedStatusCode
+            response.body.errors.count { it.field in missingFields } == missingFields.size()
+        where:
+            payload             || missingFields       | expectedStatusCode
+            [item: 'item']      || ['seller', 'price'] | BAD_REQUEST
+            [price: 19.99]      || ['seller', 'item']  | BAD_REQUEST
+            [seller: 'Seller1'] || ['item', 'price']   | BAD_REQUEST
     }
 
     private void createOrder(String user = 'anonymous', String seller = 'seller') {
