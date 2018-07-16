@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'groovy'
     id 'org.springframework.boot' version '2.0.3.RELEASE'
 }
 
@@ -20,7 +21,7 @@ def groovyDependency = "org.codehaus.groovy:groovy-all:2.4.15"
 
 dependencies {
     annotationProcessor(lombokDependency)
-    compileOnly(lombokDependency)
+    compileOnly(lombokDependency, groovyDependency)
 
     compile (
         "org.springframework.boot:spring-boot-starter-web:$springBootVersion",

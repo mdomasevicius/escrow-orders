@@ -60,3 +60,4 @@ awkward response bodies, they are Spring framework actual body wrappers. URL: `h
 * Java + Lombok - this combinations seems to confuse people the least compared to going only Groovy or Kotlin.
 * Embedded H2 DB is used along with Hibernate. Again this is overkill but Spring boot provides integration
 out of the box with minimal fuss.
+* You can check out test reports after running `gw clean build` in `<project_root>/build/reports/tests/test/index.html`
