@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/mdomasevicius/escrow-orders.svg?branch=master)](https://travis-ci.org/mdomasevicius/escrow-orders)
+
 # Escrow Ordering
 
 A simple app, which allows to:
